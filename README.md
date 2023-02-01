@@ -1,7 +1,7 @@
 # Easy Rider Bus Company
 
 ## Main Skill
-re module, NLTK library, 
+re module, set, NLTK library, 
 ## Theory
 
 ## How to use

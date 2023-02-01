@@ -1,6 +1,7 @@
 # Write your code here
 import json
 import re
+from collections import Counter
 
 STOP_TYPE = ['', 'O', 'S', 'F']
 
@@ -36,8 +37,8 @@ def is_name(to_check):
     return False
 
 
-def main():
-    error_dict = {
+def error_detect(data):
+    all_dict = {
         "bus_id": 0,
         "stop_id": 0,
         "stop_name": 0,
@@ -46,63 +47,130 @@ def main():
         "a_time": 0,
     }
 
-    format_error = {
+    for bus in data:
+        if not is_int(bus["bus_id"]):
+            all_dict["bus_id"] += 1
+
+        if not is_int(bus["stop_id"]):
+            all_dict["stop_id"] += 1
+
+        if not is_name(bus["stop_name"]):
+            all_dict["stop_name"] += 1
+
+        if not is_int(bus["next_stop"]):
+            all_dict["next_stop"] += 1
+
+        if bus["stop_type"] not in STOP_TYPE:
+            all_dict["stop_type"] += 1
+
+        if not is_time(bus["a_time"]):
+            all_dict["a_time"] += 1
+
+    return all_dict
+
+
+def format_error_detect(data):
+    format_dict = {
         "stop_name": 0,
         "stop_type": 0,
         "a_time": 0,
     }
-
-    bus_lines = {}
-
-    data = json.loads(input())
     for bus in data:
-
-        if not is_int(bus["bus_id"]):
-            error_dict["bus_id"] += 1
-        else:
-            if bus["bus_id"] in bus_lines:
-                bus_lines[bus["bus_id"]] += 1
-            else:
-                bus_lines[bus["bus_id"]] = 1
-
-        if not is_int(bus["stop_id"]):
-            error_dict["stop_id"] += 1
-
         if not is_name(bus["stop_name"]):
-            error_dict["stop_name"] += 1
-            format_error["stop_name"] += 1
-
-        if not is_int(bus["next_stop"]):
-            error_dict["next_stop"] += 1
+            format_dict["stop_name"] += 1
 
         if bus["stop_type"] not in STOP_TYPE:
-            error_dict["stop_type"] += 1
-            format_error["stop_type"] += 1
+            format_dict["stop_type"] += 1
 
         if not is_time(bus["a_time"]):
-            error_dict["a_time"] += 1
-            format_error["a_time"] += 1
+            format_dict["a_time"] += 1
 
-    all_error = 0
-    for key in error_dict:
-        all_error += error_dict[key]
+    return format_dict
 
-    all_format = 0
-    for key in format_error:
-        all_format += format_error[key]
 
-    print('Line names and number of stops:')
-    for key in bus_lines:
-        print(f'bus_id: {key}, stops: {bus_lines[key]}')
+def lines_check(data):
+    lines = {}
+    for bus in data:
+        if not is_int(bus["bus_id"]):
+            continue
+        else:
+            if bus["bus_id"] in lines:
+                lines[bus["bus_id"]] += 1
+            else:
+                lines[bus["bus_id"]] = 1
+    return lines
 
-    # print(f'Format validation: {all_format} errors')
-    # for key in format_error:
-    #     print(f'{key}: {format_error[key]}')
 
-    # print(f'Type and required field validation: {all_error} errors')
-    # for key in error_dict:
-    #     print(f'{key}: {error_dict[key]}')
+def get_stops(data):
+    stops = {}
 
+    for bus in data:
+        line = bus["bus_id"]
+        if line in stops:
+            continue
+        else:
+            stops[line] = {
+                'Start': [],
+                'Finish': [],
+                'Other': [],
+            }
+
+    for bus in data:
+        line = bus["bus_id"]
+        if bus["stop_type"] == 'S':
+            stops[line]['Start'].append(bus["stop_name"])
+
+        if bus["stop_type"] == 'F':
+            stops[line]['Finish'].append(bus["stop_name"])
+
+        if bus["stop_type"] == 'O' or bus["stop_type"] == '':
+            stops[line]['Other'].append(bus["stop_name"])
+
+    return stops
+
+
+def separate_stops(stops):
+    start_stops = set()
+    finish_stops = set()
+    all_stops = []
+
+    for line in stops:
+        start = stops[line]['Start']
+        finish = stops[line]['Finish']
+        other = stops[line]['Other']
+        if not (len(start) == 1 and len(finish) == 1):
+            print(f'There is no start or end stop for the line: {line}.')
+            quit()
+        else:
+            start_stops.update(start)
+            finish_stops.update(finish)
+            all_stops.extend(start)
+            all_stops.extend(finish)
+            all_stops.extend(other)
+
+    stop_counter = Counter(all_stops)
+    transfer_stops = []
+    for key in stop_counter:
+        if stop_counter[key] > 1:
+            transfer_stops.append(key)
+
+    return start_stops, transfer_stops, finish_stops
+
+
+def main():
+    data = json.loads(input())
+
+    error_dict = error_detect(data)
+    format_error = format_error_detect(data)
+    bus_lines = lines_check(data)
+    stops = get_stops(data)
+
+    # print(stops)
+    separated_stops = separate_stops(stops)
+
+    print(f'Start stops: {len(separated_stops[0])} {sorted(list(separated_stops[0]))}')
+    print(f'Transfer stops: {len(separated_stops[1])} {sorted(separated_stops[1])}')
+    print(f'Finish stops: {len(separated_stops[2])} {sorted(list(separated_stops[2]))}')
 
 if __name__ == '__main__':
     main()
