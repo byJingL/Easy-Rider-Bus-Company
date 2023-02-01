@@ -52,17 +52,23 @@ def main():
         "a_time": 0,
     }
 
+    bus_lines = {}
+
     data = json.loads(input())
     for bus in data:
 
         if not is_int(bus["bus_id"]):
             error_dict["bus_id"] += 1
+        else:
+            if bus["bus_id"] in bus_lines:
+                bus_lines[bus["bus_id"]] += 1
+            else:
+                bus_lines[bus["bus_id"]] = 1
 
         if not is_int(bus["stop_id"]):
             error_dict["stop_id"] += 1
 
         if not is_name(bus["stop_name"]):
-            print(bus["stop_name"])
             error_dict["stop_name"] += 1
             format_error["stop_name"] += 1
 
@@ -85,9 +91,13 @@ def main():
     for key in format_error:
         all_format += format_error[key]
 
-    print(f'Format validation: {all_format} errors')
-    for key in format_error:
-        print(f'{key}: {format_error[key]}')
+    print('Line names and number of stops:')
+    for key in bus_lines:
+        print(f'bus_id: {key}, stops: {bus_lines[key]}')
+
+    # print(f'Format validation: {all_format} errors')
+    # for key in format_error:
+    #     print(f'{key}: {format_error[key]}')
 
     # print(f'Type and required field validation: {all_error} errors')
     # for key in error_dict:
@@ -96,4 +106,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 
