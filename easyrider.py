@@ -183,7 +183,7 @@ def separate_stops(stops):
     :param stops: dictionary of all bus lines and start, finsh and other stops on each line
     :return: tuple = (
         start_stops set = {stop name1, ...},
-        transfer_stops = [stop name2, ...],
+        transfer_stops set = {stop name2, ...},
         finish_stops set = {stop name3, ...},
     )
     """
@@ -207,12 +207,14 @@ def separate_stops(stops):
             all_stops.extend(other)
 
     stop_counter = Counter(all_stops)
+    # Use list not set because we need duplicate items
     transfer_stops = []
     for key in stop_counter:
         if stop_counter[key] > 1:
             transfer_stops.append(key)
 
-    return start_stops, transfer_stops, finish_stops
+    # return all in set format to approach easier later
+    return start_stops, set(transfer_stops), finish_stops
 
 
 def get_times(data):
@@ -258,28 +260,43 @@ def check_times(times_of_lines):
     return incorrect
 
 
+def get_demand(data):
+    """Return a set of all on_demand stops"""
+    demand = set()
+    for bus in data:
+        if bus["stop_type"] == "O":
+            demand.add(bus["stop_name"])
+
+    return demand
+
+
 def main():
     data = json.loads(input())
 
+    # Check recorded errors
     error_dict = error_detect(data)
     format_error = format_error_detect(data)
     bus_lines = lines_check(data)
+
+    # Get stops information
     stops = get_stops(data)
     separated_stops = separate_stops(stops)
 
+    # On demand stops test
+    on_demand = get_demand(data)
+    stops_without_duplicate = set.union(*separated_stops)
+    wrong_type_stop = list(stops_without_duplicate.intersection(on_demand))
+
+    # Arrival time test
     times = get_times(data)
     incorrect_times = check_times(times)
 
-    print('Arrival time test:')
-    if len(incorrect_times) == 0:
+    print('On demand stops test:')
+    if len(wrong_type_stop) == 0:
         print('OK')
     else:
-        for (line, name) in incorrect_times:
-            print(f"bus_id line {line}: wrong time on station {name}")
+        print(f"Wrong stop type: {sorted(wrong_type_stop)}")
 
 
 if __name__ == '__main__':
     main()
-
-
-
