@@ -1,7 +1,7 @@
 # Easy Rider Bus Company
 Find all the mistakes in the database for a bus company based on the documentation.
 
-Support checking: required data, data format, all bus line infonmation, all stops information, all arrive times, on-demand stops
+Supported Checking: required data, data format, all bus line information, all stops information, all arrive times, on-demand stops
 
 ## Main Skill
 re module, time module, JSON file, different data structures: set, dictionary, list, tuple
