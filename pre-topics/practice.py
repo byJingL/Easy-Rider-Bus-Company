@@ -56,3 +56,64 @@ match = re.match(template, "first group second group group")
 
 template = r"python|java|kotlin"
 print(re.match(template, "python c++"))
+
+# ====================== Set Create ======================== #
+empty_set = set()
+
+flowers = {'rose', 'lilac', 'daisy'}
+print(flowers) # {'daisy', 'rose', 'lilac'}
+
+letters = set("hello")
+print(letters) # {'e', 'h', 'l', 'o'}
+
+states = ['Russia', 'USA', 'USA', 'Germany', 'Italy']
+print(set(states)) # {'USA', 'Italy', 'Russia', 'Germany'}
+
+set1 = {'A', 'B', 'C'}
+set2 = {'B', 'C', 'A'}
+print(set1 == set2)  # True
+
+# ====================== Set work with ======================== #
+nums = {1, 2, 2, 3}
+nums.add(5)
+print(nums)  # {1, 2, 3, 5}
+
+more_nums = {6, 8}
+nums.update(more_nums)
+print(nums)  # {1, 2, 3, 5, 6, 8}
+ 
+# add a list
+text = ['how', 'are', 'you']
+nums.update(text)
+print(nums)  # {'you', 1, 2, 3, 5, 6, 7, 'are', 'how'}
+ 
+# add a string
+word = 'hello'
+nums.add(word)
+print(nums)  # {1, 2, 3, 'how', 5, 6, 7, 'hello', 'you', 'are'}
+
+# ====================== Set Union ======================== #
+A = {'Kennedy', 'Obama'}
+B = {'Trump', 'Lincoln'}
+presidents = A.union(B)
+also_presidents = A | B
+print(presidents, presidents == also_presidents)
+# {'Lincoln', 'Obama', 'Trump', 'Kennedy'} True
+A |= B
+print(A)  # {'Lincoln', 'Obama', 'Trump', 'Kennedy'}
+
+# ====================== Set Intersection ======================== #
+creatures = {'human', 'rabbit', 'cat'}
+pets = {'dog', 'cat'}
+both = creatures.intersection(pets)
+also_both = creatures & pets
+print(both, both == also_both) # {'cat'} True
+
+creatures &= pets # or creatures.intersection_update(pets)
+print(creatures) # {'cat'}
+
+# ================ Operation and Method ================= #
+a = set('hello')
+b = 'Hello'
+both = a.intersection(b)
+print(both)  # {'e', 'l', 'o'}

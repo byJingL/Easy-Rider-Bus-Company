@@ -1,7 +1,7 @@
 # Easy Rider Bus Company
 
 ## Main Skill
-re module, set, NLTK library, 
+re module, time module, different data structures: set, dictionary, list, tuple
 ## Theory
 
 ## How to use
